@@ -16,7 +16,6 @@ app.controller('myCtrl', function ($scope, $http) {
         publicKey: "."
     };
 
-
     $scope.patientForm = {
         $class: "nz.ac.auckland.Patient",
         id: "string",
@@ -36,7 +35,7 @@ app.controller('myCtrl', function ($scope, $http) {
         gender: "string",
         birthplace: "string",
         address: "string",
-        records: ".",
+        records: "[]",
         PkeyPpass: ".",
         PkeyHPpass: "."
     }
@@ -67,7 +66,8 @@ app.controller('myCtrl', function ($scope, $http) {
     $scope.immunizationForm = {}
     $scope.conditionForm = {}
 
-
+    let _id;
+    let _records;
     $scope.myArray = []
 
 
@@ -80,11 +80,12 @@ app.controller('myCtrl', function ($scope, $http) {
     $scope.submitPatient = function () {
         var endpoint = apiBaseURL + "Patient"
         $scope.endpoint = endpoint
-
+        patientForm = Object.assign({}, $scope.patientForm)
+        encryptForm(patientForm)
         $http({
             method: 'POST',
             url: endpoint,
-            data: angular.toJson($scope.patientForm),
+            data: angular.toJson(patientForm),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -144,24 +145,74 @@ app.controller('myCtrl', function ($scope, $http) {
                 recordForm = $scope.medicationForm
                 break;
         }
-        $scope.recordForm = Object.assign($scope.recordForm, recordForm)
-        var encryptedRecord = symEncrypt(JSON.stringify($scope.recordForm),'5266556A586E3272357538782F413F442A472D4B6150645367566B5970337336')
+        recordForm = Object.assign({}, $scope.recordForm, recordForm)
+        console.log(recordForm)
+        var records = JSON.parse(_records)
+        records.push(recordForm )
+        
+
+        var encryptedRecord = symEncrypt(JSON.stringify(records))
         encryptedRecord = JSON.parse(encryptedRecord)
-        console.log(encryptedRecord)
-        console.log(encryptedRecord.ct)
-        let decryptedRecord = symDecrypt(encryptedRecord.ct, '5266556A586E3272357538782F413F442A472D4B6150645367566B5970337336', encryptedRecord.iv)
-        console.log(decryptedRecord)
+
+        let updatedRecords = {
+            updatedRecords: encryptedRecord.ct,
+            patient: "resource:" + namespace + ".Patient#" + _id
+        }
+        console.log("ID: " + _id)
+
+        var endpoint = apiBaseURL + "MedicalEncounter"
+        $scope.endpoint = endpoint
+
+        $http({
+            method: 'POST',
+            url: endpoint,
+            data: angular.toJson(updatedRecords),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(_success, _error)
+    }
+
+    $scope.getPatients = function () {
+        var endpoint = apiBaseURL + 'Patient'
+        $scope.endpoint = endpoint
+
+        $http.get(endpoint).then(function(response) {
+            $scope.viewData(response.data)
+            $scope.myStatus = response.status
+            
+            var tempRecords = response.data
+
+            var keys = Object.keys(tempRecords)
+
+            console.log(keys)
+
+            keys.forEach(function(key) {
+                decryptForm(tempRecords[key])
+            })
+
+            $scope.myArray = tempRecords
+            
+        }, _error)
+
+
     }
 
     $scope.delete = function (index) {
-        var tag = $scope.myArray[index].$class
-        var id = $scope.myArray[index].id
-        tag = tag.replace(namespace + '.', '')
+        var isConfirmed = confirm("Are you sure you want to delete this patient?")
 
-        var endpoint = apiBaseURL + tag + "/" + id
-        $scope.endpoint = endpoint
+        if (isConfirmed) {
+            var tag = $scope.myArray[index].$class
+            var id = $scope.myArray[index].id
+            tag = tag.replace(namespace + '.', '')
 
-        $http.delete(endpoint).then(_success, _error)
+            var endpoint = apiBaseURL + tag + "/" + id
+            $scope.endpoint = endpoint
+
+            $http.delete(endpoint).then(_success, _error)
+        } else {
+            alert("Deletion averted")
+        }
     }
 
     $scope.getData = function (tag) {
@@ -182,16 +233,36 @@ app.controller('myCtrl', function ($scope, $http) {
 
         }
         console.log($scope.healthProviderForm)
-
     }
 
-    /**
-     * Store the current state of the ItemForm in web cache
-     */
-    $scope.addItemToCache = function () {
-        const item = Object.assign({}, $scope.itemForm)
-        $scope.items.push(item)
-        $scope.myResponse = "Item added (locally, not to node)"
+    $scope.getId = function (index) {
+        _id = $scope.myArray[index].id
+        _records = $scope.myArray[index].records
+    }
+
+    function encryptForm (form) {
+        var keys = Object.keys(form)
+
+        keys.forEach(function(key) {
+            if (!(key == "$class" || key == "id")) {
+                var encryptedData = symEncrypt(form[key])
+                encryptedData = JSON.parse(encryptedData)
+                form[key] = encryptedData.ct
+            }
+            
+        })
+        console.log(form)
+    }
+
+    function decryptForm (form) {
+        var keys = Object.keys(form)
+
+        keys.forEach(function (key){
+            if (!(key == "$class" || key == "id")) {
+                var decryptedData = symDecrypt(form[key])
+                form[key] = decryptedData
+            }
+        })
     }
 
     /**
