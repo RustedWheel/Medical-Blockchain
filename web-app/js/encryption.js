@@ -20,12 +20,9 @@ function loaded() {
     return salt;
   }
 
+  function kdf(password, salt){
 
-  function stretchPassword(password){
-
-    console.log("Password: " + password);
-
-     var salt = getRandomSalt(2,10);
+     console.log("Password: " + password);
 
      var iterations = 10000;
 

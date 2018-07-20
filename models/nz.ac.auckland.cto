@@ -43,8 +43,16 @@ asset Patient identified by id{
   o String birthplace
   o String address
   o String records optional
+  o String salt
+  o String iv
   o String PkeyPpass
   o String PkeyHPpass
+}
+
+asset patientKey identified by id{
+  o String id
+  --> HealthProvider healthProvider
+  o String encryptedPatientKey
 }
 
 concept Record{
@@ -107,6 +115,7 @@ participant HealthProvider identified by id {
   o String phone
   o String address
   o String publicKey
+  o String patientKeys
 }
 
 participant Viewer identified by id {
@@ -120,13 +129,45 @@ transaction MedicalEncounter {
 }
 
 event MedicalEncounterNotification {
-    --> Patient patient
+  --> Patient patient
 }
 
-event RemoveNotification {
-    --> Patient patient
+transaction RequestMedicalRecordSharing {
+  --> Patient patient
+  --> HealthProvider healthProvider
 }
 
-transaction RemovePatient {
-    --> Patient patient
+event RequestMedicalRecordSharingNotification {
+  --> Patient patient
+  --> HealthProvider healthProvider
+}
+
+transaction ShareMedicalRecords {
+  --> Patient patient
+  --> HealthProvider healthProvider
+}
+
+event ShareMedicalRecordsNotification {
+  --> Patient patient
+  --> HealthProvider healthProvider
+}
+
+transaction RecordSharingComplete {
+  --> Patient patient
+  --> HealthProvider healthProvider
+}
+
+event RecordSharingCompleteNotification {
+  --> Patient patient
+  --> HealthProvider healthProvider
+}
+
+transaction RevokeMedicalRecordsSharing {
+  --> Patient patient
+  --> HealthProvider healthProvider
+}
+
+event RevokeMedicalRecordsSharingNotification {
+  --> Patient patient
+  --> HealthProvider healthProvider
 }
