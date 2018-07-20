@@ -51,8 +51,9 @@ asset Patient identified by id{
 
 asset patientKey identified by id{
   o String id
+  --> Patient patient
   --> HealthProvider healthProvider
-  o String encryptedPatientKey
+  o String encryptedPatientKeyHPpass
 }
 
 concept Record{
@@ -145,16 +146,19 @@ event RequestMedicalRecordSharingNotification {
 transaction ShareMedicalRecords {
   --> Patient patient
   --> HealthProvider healthProvider
+  o String encryptedPatientKeyHPPublic
 }
 
 event ShareMedicalRecordsNotification {
   --> Patient patient
   --> HealthProvider healthProvider
+  o String encryptedPatientKeyHPPublic
 }
 
 transaction RecordSharingComplete {
   --> Patient patient
   --> HealthProvider healthProvider
+  o String encryptedPatientKeyHPPass
 }
 
 event RecordSharingCompleteNotification {
