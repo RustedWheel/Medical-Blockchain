@@ -49,7 +49,7 @@ asset Patient identified by id{
   o String PkeyHPpass
 }
 
-asset patientKey identified by id{
+asset PatientKey identified by id{
   o String id
   --> Patient patient
   --> HealthProvider healthProvider

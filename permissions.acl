@@ -16,7 +16,7 @@ rule HealthProviderSeeOwnHistoryOnly {
     participant(m): "nz.ac.auckland.HealthProvider"
     operation: READ
     resource(v): "org.hyperledger.composer.system.HistorianRecord"
-    condition: (v.participantInvoking.getIdentifier() != m.getIdentifier)
+    condition: (v.participantInvoking.getIdentifier() != m.getIdentifier())
     action: DENY
 }
 
@@ -25,6 +25,98 @@ rule HealthProvidersFullAccessMedicalEncounter {
     participant: "nz.ac.auckland.HealthProvider"
     operation: ALL
     resource: "nz.ac.auckland.MedicalEncounter"
+    action: ALLOW
+}
+
+rule HealthProvidersCanOnlyAccessOwnRequestForRecordSharingTransactions {
+    description: ""
+    participant(hp) : "nz.ac.auckland.HealthProvider"
+    operation: READ, UPDATE, DELETE
+    resource(rmrs): "nz.ac.auckland.RequestMedicalRecordSharing"
+    condition: (rmrs.healthProvider.getIdentifier() == hp.getIdentifier())
+    action: ALLOW
+}
+
+rule HealthProvidersCanCreateRequestForRecordSharingTransactions {
+    description: ""
+    participant: "nz.ac.auckland.HealthProvider"
+    operation: CREATE
+    resource: "nz.ac.auckland.RequestMedicalRecordSharing"
+    action: ALLOW
+}
+
+rule ViewerCanOnlySeeRequestForRecordSharingTransactions {
+    description: ""
+    participant: "nz.ac.auckland.Viewer"
+    operation: READ
+    resource: "nz.ac.auckland.RequestMedicalRecordSharing"
+    action: ALLOW
+}
+
+rule ViewerEnableShareMedicalRecordsTransactions {
+    description: ""
+    participant: "nz.ac.auckland.Viewer"
+    operation: ALL
+    resource: "nz.ac.auckland.ShareMedicalRecords"
+    action: ALLOW
+}
+
+rule HealthProvidersCanOnlySeeOwnShareMedicalRecordsTransactions {
+    description: ""
+    participant(hp) : "nz.ac.auckland.HealthProvider"
+    operation: READ
+    resource(smr) : "nz.ac.auckland.ShareMedicalRecords"
+    condition: (smr.healthProvider.getIdentifier() == hp.getIdentifier())
+    action: ALLOW
+}
+
+rule HealthProvidersCanOnlyAccessOwnRecordSharingCompleteTransactions {
+    description: ""
+    participant(hp) : "nz.ac.auckland.HealthProvider"
+    operation: READ, UPDATE, DELETE
+    resource(rsc): "nz.ac.auckland.RecordSharingComplete"
+    condition: (rsc.healthProvider.getIdentifier() == hp.getIdentifier())
+    action: ALLOW
+}
+
+rule HealthProvidersCanCreateRecordSharingCompleteTransactions {
+    description: ""
+    participant: "nz.ac.auckland.HealthProvider"
+    operation: CREATE
+    resource: "nz.ac.auckland.RecordSharingComplete"
+    action: ALLOW
+}
+
+rule ViewerCanOnlySeeRecordSharingCompleteTransactions {
+    description: ""
+    participant: "nz.ac.auckland.Viewer"
+    operation: READ
+    resource: "nz.ac.auckland.RevokeMedicalRecordsSharing"
+    action: ALLOW
+}
+
+rule HealthProvidersCanSeeRevokeMedicalRecordsSharingTransactionsRelatedToThemselvesOnly {
+    description: ""
+    participant: "nz.ac.auckland.HealthProvider"
+    operation: READ
+    resource: "nz.ac.auckland.RevokeMedicalRecordsSharing"
+    action: ALLOW
+}
+
+rule ViewerEnableRevokeMedicalRecordsSharingTransactions {
+    description: ""
+    participant: "nz.ac.auckland.Viewer"
+    operation: ALL
+    resource: "nz.ac.auckland.RevokeMedicalRecordsSharing"
+    action: ALLOW
+}
+
+rule HealthProvidersCanOnlyAccessOwnSharedPatientKeys {
+    description: "Only allow health providers to access the encrypted patient keys that are shared with them"
+    participant(t): "nz.ac.auckland.HealthProvider"
+    operation: UPDATE
+    resource(v): "nz.ac.auckland.PatientKey"
+    condition: (v.healthProvider.getIdentifier() == t.getIdentifier())
     action: ALLOW
 }
 

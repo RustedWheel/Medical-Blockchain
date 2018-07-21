@@ -36,6 +36,8 @@ app.controller('myCtrl', function ($scope, $http) {
         birthplace: "string",
         address: "string",
         records: "[]",
+        salt,
+        iv,
         PkeyPpass: ".",
         PkeyHPpass: "."
     }
