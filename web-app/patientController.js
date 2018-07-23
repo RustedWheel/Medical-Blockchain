@@ -2,8 +2,8 @@ var app = angular.module('myApp');
 var apiBaseURL = "http://localhost:3000/api/";
 
 app.controller('PatientController', [
-    '$scope', '$http', 'title','patient','update', 'close',
-    function ($scope, $http, title, patient, update, close) {
+    '$scope', '$http','patient','update', 'close',
+    function ($scope, $http, patient, update, close) {
 
         $scope.update = update
 
@@ -27,6 +27,8 @@ app.controller('PatientController', [
             birthplace: "string",
             address: "string",
             records: "[]",
+            iv: ".",
+            salt: ".",
             PkeyPpass: ".",
             PkeyHPpass: "."
         }
@@ -76,7 +78,7 @@ app.controller('PatientController', [
             var keys = Object.keys(form)
     
             keys.forEach(function (key) {
-                if (!(key == "$class" || key == "id")) {
+                if (!(key == "$class" || key == "id" || key == "salt" || key == "iv" || key == "PkeyPpass" || key == "PkeyHPpass")) {
                     var encryptedData = symEncrypt(form[key])
                     encryptedData = JSON.parse(encryptedData)
                     form[key] = encryptedData.ct
@@ -120,19 +122,4 @@ app.controller('PatientController', [
             $('#json-renderer').jsonViewer(data, { collapsed: true });
     
         }
-
-        //  This cancel function must use the bootstrap, 'modal' function because
-        //  the doesn't have the 'data-dismiss' attribute.
-        // $scope.cancel = function () {
-
-        //     //  Manually hide the modal.
-        //     $element.modal('hide');
-
-        //     //  Now call close, returning control to the caller.
-        //     close({
-        //         name: $scope.name,
-        //         age: $scope.age
-        //     }, 500); // close, but give 500ms for bootstrap to animate
-        // };
-
     }]);
