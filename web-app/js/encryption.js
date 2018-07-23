@@ -1,5 +1,5 @@
-const _key = '5266556A586E3272357538782F413F442A472D4B6150645367566B5970337336';
-const _initialisationVector = 'Jhs8/MFOrBhevTzoE6t0IQ==';
+// const _key = '5266556A586E3272357538782F413F442A472D4B6150645367566B5970337336';
+// const _initialisationVector = 'Jhs8/MFOrBhevTzoE6t0IQ==';
 
 function loaded() {
     //var buf = crypto.randomBytes(1024 / 8) // 128 bytes
@@ -42,20 +42,20 @@ function loaded() {
      return key;
   }
 
-  function symEncrypt(data){
+  function symEncrypt(data, key, iv){
 
-    console.log("Encrypting data: Data = " + data + " Key = " + _key);
+    console.log("Encrypting data: Data = " + data + " Key = " + key);
 
      if (data === '') { return ''; }
-     if (_key.length == 0) {
+     if (key.length == 0) {
        error("Need a key!");
        return;
      }
 
-    key = sjcl.codec.hex.toBits(_key);
+    key = sjcl.codec.hex.toBits(key);
 
      // Key must be in bit array
-     var result = sjcl.encrypt(key, data, {iv : "Jhs8/MFOrBhevTzoE6t0IQ==", mode : "ccm"});
+     var result = sjcl.encrypt(key, data, {iv : iv, mode : "ccm"});
 
      console.log(result);
 
@@ -63,22 +63,22 @@ function loaded() {
   }
 
 
-  function symDecrypt(encryptedData){
+  function symDecrypt(encryptedData, key, iv){
 
      if (encryptedData.length === 0) { return ''; }
-     if (_key.length == 0) {
+     if (key.length == 0) {
        error("Need a key!");
        return;
      }
-     if (_initialisationVector.length === 0) {
+     if (iv.length === 0) {
       error("Can't decrypt: need an IV!"); return;
      }
 
-     key = sjcl.codec.hex.toBits(_key);
+     key = sjcl.codec.hex.toBits(key);
 
      key = new sjcl.cipher.aes(key);
 
-     initialisationVector = sjcl.codec.base64.toBits(_initialisationVector);
+     initialisationVector = sjcl.codec.base64.toBits(iv);
 
      encryptedData = sjcl.codec.base64.toBits(encryptedData);
 
