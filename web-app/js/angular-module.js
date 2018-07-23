@@ -29,8 +29,9 @@ app.controller('myCtrl', function ($scope, $http, ModalService) {
         record_reasonDesc: "string",
         healthProvider: ""
     }
-
     $scope.patientTab = true
+
+    $scope.passwordKey = ""
 
     $scope.selectedRecord = {}
     $scope.types = ["Allergy", "Procedure", "Observation", "Medication", "Immunization", "Condition"]
@@ -203,9 +204,14 @@ app.controller('myCtrl', function ($scope, $http, ModalService) {
     function decryptForm(form) {
         var keys = Object.keys(form)
 
+        var iv = form["iv"]
+
+        console.log("IV: " + iv)
+
+
         keys.forEach(function (key) {
-            if (!(key == "$class" || key == "id")) {
-                var decryptedData = symDecrypt(form[key])
+            if (!(key == "$class" || key == "id" || key == "salt" || key == "iv" || key == "PkeyPpass" || key == "PkeyHPpass")) {
+                var decryptedData = symDecrypt(form[key], passwordKey, iv)
                 form[key] = decryptedData
             }
         })
@@ -264,7 +270,13 @@ app.controller('myCtrl', function ($scope, $http, ModalService) {
             }
         }).then(function (modal) {
             modal.element.modal();
-
+            modal.close.then (function (result) {
+                if (!result) {
+                    alert("Modal forcibly closed...")
+                  } else {
+                    $scope.passwordKey = result.passwordKey
+                  }
+            })
         });
 
     };
