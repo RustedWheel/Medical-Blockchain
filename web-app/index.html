@@ -17,6 +17,9 @@
     <script src="js/angular-module.js"></script>
     <script src="js/jquery.json-viewer.js"></script>
     <script src="js/encryption.js"></script>
+    <script src="patientController.js"></script>
+    <script src="https://dwmkerr.github.io/angular-modal-service/angular-modal-service.js"></script>
+
 </head>
 
 <body ng-app="myApp" ng-controller="myCtrl" onload="loaded()">
@@ -28,61 +31,6 @@
             </li>
         </ul>
     </nav>
-
-    <!--Modal Box to add patients -->
-    <div id="patientModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <!--<button type="button" class="stretchPassword" onclick="symDecrypt('qpqUP/mwsKLTyzwdXP/Xtg==', 'd0c61d3c7279c9d7db06a4a44162f95a03925201ff23d1662f336d34c40790fa', 'Q+7/K+0I2XjBSgRA/oc1jQ==')" >&loz;</button> -->
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Add Patient</h4>
-                </div>
-                <div class="modal-body">
-                    <p>PID:
-                        <input type="text" ng-model="patientForm.id" ng-disabled="update"> </p>
-                    <p>Birthdate:
-                        <input type="text" ng-model="patientForm.birthDate"> </p>
-                    <p>Death date:
-                        <input type="text" ng-model="patientForm.deathDate"> </p>
-                    <p>IRD Number:
-                        <input type="text" ng-model="patientForm.ird"> </p>
-                    <p>Driver Number:
-                        <input type="text" ng-model="patientForm.drivers"> </p>
-                    <p>Passport Number:
-                        <input type="text" ng-model="patientForm.passport"> </p>
-                    <p>Prefix:
-                        <input type="text" ng-model="patientForm.prefix"> </p>
-                    <p>First Name:
-                        <input type="text" ng-model="patientForm.first"> </p>
-                    <p>LastName:
-                        <input type="text" ng-model="patientForm.last"> </p>
-                    <p>Suffic:
-                        <input type="text" ng-model="patientForm.suffic"> </p>
-                    <p>Maiden Name:
-                        <input type="text" ng-model="patientForm.maiden"> </p>
-                    <p>Marital:
-                        <input type="text" ng-model="patientForm.marital"> </p>
-                    <p>Race:
-                        <input type="text" ng-model="patientForm.race"> </p>
-                    <p>Ethnicity:
-                        <input type="text" ng-model="patientForm.ethinicity"> </p>
-                    <p>Gender:
-                        <input type="text" ng-model="patientForm.gender"> </p>
-                    <p>Birthplace:
-                        <input type="text" ng-model="patientForm.birthplace"> </p>
-                    <p>Address:
-                        <input type="text" ng-model="patientForm.address"> </p>
-                </div>
-                <div class="modal-footer">
-                    <button ng-click="submitPatient()" type="button" class="btn btn-default" data-dismiss="modal">Submit</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-show="update">Update</button>
-
-                </div>
-            </div>
-        </div>
-    </div>
-    <br/>
 
     <!--Modal Box to add health providers-->
     <div id="hpModal" class="modal fade" role="dialog">
@@ -260,7 +208,7 @@
             </a>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="#patient" data-toggle="tab">Patient</a>
+                    <a href="#patient" data-toggle="tab" ng-click="setTab('Patient')">Patient</a>
                 </li>
             </ul>
         </li>
@@ -270,10 +218,10 @@
             </a>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="#healthProvider" data-toggle="tab">Health Provider</a>
+                    <a href="#healthProvider" data-toggle="tab" ng-click="setTab('HealthProvider')">Health Provider</a>
                 </li>
                 <li>
-                    <a href="#viewer" data-toggle="tab">Viewer</a>
+                    <a href="#viewer" data-toggle="tab" ng-click="setTab('Viewer')">Viewer</a>
                 </li>
             </ul>
         </li>
@@ -290,7 +238,7 @@
 
         <div id="patient" class="tab-pane fade in active">
             <h1>Patients</h1>
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#patientModal">Add Patient</button>
+            <button type="button" class="btn btn-default" ng-click="addPatient()">Add Patient</button>
             <button type="button" class="btn btn-default" ng-click="getPatients()">Get Patients</button>
         </div>
         <div id="healthProvider" class="tab-pane fade">
@@ -320,7 +268,7 @@
     </div>
 
     <div class="container-fluid">
-        <table class="table table-striped">
+        <table class="table table-striped" style="width: 100%;">
             <tr>
                 <th ng-repeat="(key, val) in myArray[0]">{{ key }}</th>
                 <th>Options</th>
@@ -329,11 +277,14 @@
                 <td ng-repeat="column in row ">
                     {{ column }}
                 </td>
-                <td><button type="button" class="btn btn-default" ng-click="getDetails($index)">Details</button></td>
-                <td><button type="button" ng-click="getId($index)" class="btn btn-default" data-toggle="modal" data-target="#recordModal">+</button></td>
-                <td><button type="button" class="btn btn-default" ng-click="delete($index)">-</button></td>
+                <td><button type="button" class="btn btn-default" ng-click="editPatient($index)" ng-show="patientTab">Edit</button>
+                <button type="button" ng-click="getId($index)" class="btn btn-default" data-toggle="modal" data-target="#recordModal">+</button>
+                <button type="button" class="btn btn-default" ng-click="delete($index)">-</button></td>
             </tr>
         </table>
+    </div>
+
+    <div class="container-fluid">
 
         <!--Box to view response in JSON format -->
         <h4>Response data</h4>
